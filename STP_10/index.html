@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Book App</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    </head>
+    <body>
+        <div id="app">
+            <div>
+                <h2>All Books</h2>
+                <div>
+                    <table class="table table-striped table-dark">
+                        <thead>
+                          <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Year</th>
+                            <th scope="col">Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="book in books">
+                            <th scope="row">{{book.Id}}</th>
+                            <td>{{book.Name}}</td>
+                            <td>{{book.Year}}</td>
+                            <td>{{book.Description}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                </div>
+            </div>
+            <div>
+                <h4>Search by ID</h4>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Book Id</span>
+                    <input v-model="input" v-on:keyup.enter="getBookById" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                </div>
+                <button @click="getBookById" type="button" class="btn btn-success mb-2">Search</button>
+                <div v-if="selectedBook && !error">
+                    <div class="shadow-sm p-3 mb-1 bg-body rounded">Name: {{selectedBook.Name}}</div>
+                    <div class="shadow-sm p-3 mb-1 bg-body rounded">Year: {{selectedBook.Year}}</div>
+                    <div class="p-3 mb-1 bg-body">Description: {{selectedBook.Description}}</div>
+                </div>
+                <div v-if="!selectedBook && !error" class="alert alert-dark" role="alert">
+                    Input Book Id to see information about id. 
+                  </div>
+                <div v-if="error" class="alert alert-danger" role="alert">
+                    Something went wrong!
+                  </div>
+            </div>
+        </div>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+        <script>
+            let uri = 'api/books';
+            const app = new Vue({
+                el: '#app',
+                data: () => ({
+                    books: [],
+                    selectedBook: null,
+                    input: '',
+                    error: false
+                }),
+                created() {
+                    axios.get(uri)
+                        .then((res) => {
+                            this.books = res.data;
+                        })
+                        .catch(err => {
+                            console.log('Cannot load books');
+                        })
+                },
+                methods: {
+                    getBookById() {
+                        let id = this.input;
+                        if (String(id).trim() !== '') {
+                            axios.get(`${uri}/${id}`)
+                                .then(res => {
+                                    this.selectedBook = res.data;
+                                    this.error = false;
+                                })
+                                .catch((err) => {
+                                    this.error = true;
+                                    this.selectedBook = null;
+                                })
+                        }
+                    }
+                }
+            })
+        </script>
+        <style>
+            body {
+                margin: 0 4em;
+                display: block;
+            }
+        </style>
+    </body>
+</html>
